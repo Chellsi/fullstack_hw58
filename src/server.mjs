@@ -102,7 +102,7 @@ function handlePostRequest(pathname, req, res) {
       
     } catch (error) {
       console.error('Error processing POST request:', error);
-      const errorHTML = generateHTML('500 Internal Server Error', '<p>Server Error</p>');
+      const errorHTML = generateHTML('Error 500', '<p>Server Error</p>');
       sendResponse(res, 500, errorHTML);
     }
   });
@@ -143,19 +143,22 @@ const server = http.createServer((req, res) => {
     } else {
       // Метод не підтримується
       const errorHTML = generateHTML('405 Method Not Allowed', '<p>Method Not Allowed</p>');
+      const body = Buffer.from(errorHTML, 'utf8');
+      
       res.writeHead(405, {
         'Content-Type': 'text/html; charset=utf-8',
+        'Content-Length': body.length,
         'Allow': 'GET, POST',
         'X-Content-Type-Options': 'nosniff'
       });
-      res.end(errorHTML);
+      res.end(body);
     }
   } catch (error) {
     console.error('Unexpected server error:', error);
     
     // Перевіряємо, чи відповідь ще не була відправлена
     if (!res.headersSent) {
-      const errorHTML = generateHTML('500 Internal Server Error', '<p>Server Error</p>');
+      const errorHTML = generateHTML('Error 500', '<p>Server Error</p>');
       sendResponse(res, 500, errorHTML);
     }
   }
@@ -190,6 +193,5 @@ process.on('SIGTERM', () => {
     process.exit(0);
   });
 });
-
 
 export { server };
